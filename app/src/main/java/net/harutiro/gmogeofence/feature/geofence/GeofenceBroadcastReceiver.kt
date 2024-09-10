@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
+import net.harutiro.gmogeofence.feature.notification.GeoNotification
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
@@ -59,15 +60,11 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 }
             }
 
-//            // Get the transition details as a String.
-//            val geofenceTransitionDetails = getGeofenceTransitionDetails(
-//                this,
-//                geofenceTransition,
-//                triggeringGeofences
-//            )
-//
-//            // Send notification and log the transition details.
-//            sendNotification(geofenceTransitionDetails)
+            if(context != null){
+                val geoNotification = GeoNotification()
+                geoNotification.showNotification(context,"とりあえずジオフェンスのイベントが走った")
+            }
+
             Log.i(TAG, "とりあえずジオフェンスのイベントが走った" + triggeringGeofences.toString())
         } else {
             // Log the error

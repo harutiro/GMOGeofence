@@ -3,6 +3,9 @@ package net.harutiro.gmogeofence.ui.map
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,17 +24,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.harutiro.gmogeofence.model.LatLon
 import net.harutiro.gmogeofence.ui.theme.GMOGeofenceTheme
 import net.harutiro.gmogeofence.feature.map.MapSetupController
 import net.harutiro.gmogeofence.feature.map.MapTapController
+import net.harutiro.gmogeofence.feature.notification.GeoNotification
 import net.harutiro.gmogeofence.ui.map.component.MapView
 
 @Composable
 fun MapScreen(mainViewModel:MainViewModel = viewModel()){
     val context = LocalContext.current
     val activity: Activity = LocalContext.current as Activity
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            // 許可された
+        }
+    }
 
     Box {
         MapView { map ->
@@ -61,8 +72,19 @@ fun MapScreen(mainViewModel:MainViewModel = viewModel()){
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-//            Text("緯度:${latlng.latitude}")
-//            Text("経度:${latlng.longitude}")
+            Button(onClick = {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ){
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }){
+                Text("通知発行のパ＝ミッション許可をもらう")
+            }
             Button(
                 onClick = {
                     mainViewModel.startGeofence()
