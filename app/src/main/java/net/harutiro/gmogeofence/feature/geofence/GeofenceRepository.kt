@@ -27,7 +27,7 @@ class GeofenceRepository(_activity: Context) {
         // FLAG_UPDATE_CURRENT を使用して、呼び出し時に同じ保留中のインテントを取得します。
         // addGeofences() and removeGeofences().
         // PendingIntentはMUTABLEでなければならない　Intentで渡すデータが変わるから
-        PendingIntent.getBroadcast(activity, 0, intent, PendingIntent.FLAG_MUTABLE)
+        PendingIntent.getBroadcast(activity, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     fun createGeofence(entry: EntryData, radius: Float) {
@@ -49,8 +49,11 @@ class GeofenceRepository(_activity: Context) {
             // このサンプルでは、入口と出口の遷移を追跡します。
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
 
-            // 通知の初期遅延を設定します。 このサンプルでは、ジオフェンスに入るとすぐにアラートが生成されます。
-//            .setNotificationResponsiveness(5000)
+            // ジオフェンスのベストエフォート通知応答性を設定します。 このサンプルでは、ジオフェンスに入るとすぐにアラートが生成されます。
+            // 。応答性の値を大きく設定すると (たとえば 5 分)、電力を大幅に節約できます。
+            // ただし、応答性の値に非常に小さい値 (たとえば 5 秒) を設定しても、ユーザーがジオフェンスに出入りした直後に通知が届くとは限りません。
+            // 内部的には、ジオフェンスが必要に応じて応答性の値を調整して電力を節約する場合があります。
+            .setNotificationResponsiveness(5000)
 
             // ジオフェンスを作成します。
             .build()
@@ -78,6 +81,7 @@ class GeofenceRepository(_activity: Context) {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
+            // もし追加をする時に、位置情報の取得を常にとやっていない場合はエラーになる
             geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
                 addOnSuccessListener {
                     Log.d(TAG, "addGeoFences: Success")
