@@ -14,15 +14,12 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     val TAG = "GeofenceBroadcastReceiver"
     // ...
     override fun onReceive(context: Context?, intent: Intent?) {
+        Log.d(TAG,"Geofenceのイベントが走った")
 
-        Log.d(TAG,"onReceive")
-
+        // GeoFencingイベントを取得
         val geofencingEvent = GeofencingEvent.fromIntent(intent!!)
 
-
-        Log.d(TAG,"intent: $intent")
-        Log.d(TAG,"geofencingEvent: $geofencingEvent")
-
+        // エラーハンドリング
         if (geofencingEvent?.hasError() == true) {
             val errorMessage = GeofenceStatusCodes
                 .getStatusCodeString(geofencingEvent.errorCode)
@@ -30,45 +27,51 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             return
         }
 
-        // Get the transition type.
+        // GeoFencingイベントのタイプを取得
         val geofenceTransition = geofencingEvent?.geofenceTransition
 
-        // Test that the reported transition was of interest.
+        // 入室・退室・滞在しているかの判定
         if (
             geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-            geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT
+            geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ||
+            geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL
         ) {
+            // ジオフェンスのトリガーイベントが発生した場合の処理
+            val triggeringGeofence: List<Geofence>? = geofencingEvent.triggeringGeofences
 
-            val triggeringGeofences = geofencingEvent.triggeringGeofences
+            // トリガーされたジオフェンスの情報を利用して必要な処理を行います
+            if (triggeringGeofence != null) {
+                for (geofence in triggeringGeofence) {
+                    val requestId: String = geofence.requestId
+                    // ジオフェンスの情報を利用して必要な処理を行います
+                    // 例: ジオフェンスのIDを表示
+                    Log.d(TAG, "Geofence ID: $requestId")
+                    // どの状態でいるか
+                    Log.d(TAG, "Geofence Transition: ${geofence.transitionTypes}")
 
-            if (geofencingEvent.hasError()) {
-                // エラーイベントが発生した場合の処理
-                val errorCode: Int = geofencingEvent.errorCode
-                Log.e("Geofence", "Geofencing error: $errorCode")
-            } else {
-                // ジオフェンスのトリガーイベントが発生した場合の処理
-                val triggeringGeofence: List<Geofence>? = geofencingEvent.triggeringGeofences
-
-                // トリガーされたジオフェンスの情報を利用して必要な処理を行います
-                if (triggeringGeofence != null) {
-                    for (geofence in triggeringGeofence) {
-                        val requestId: String = geofence.requestId
-                        // ジオフェンスの情報を利用して必要な処理を行います
-                        // 例: ジオフェンスのIDを表示
-                        Log.d(TAG, "Geofence ID: $requestId")
-                    }
+                    sendNotification(context, "ジオフェンスの「${transitionTypes(geofence.transitionTypes)}」ました")
                 }
             }
+        }
+    }
 
-            if(context != null){
-                val geoNotification = GeoNotification()
-                geoNotification.showNotification(context,"とりあえずジオフェンスのイベントが走った")
-            }
+    private fun transitionTypes(transitionTypes: Int): String {
+        if(transitionTypes == Geofence.GEOFENCE_TRANSITION_ENTER){
+            return "エリアの中に入った"
+        }else if(transitionTypes == Geofence.GEOFENCE_TRANSITION_EXIT){
+            return "エリアから出た"
+        }else if(transitionTypes == Geofence.GEOFENCE_TRANSITION_DWELL){
+            return "エリアに滞在中です"
+        }else{
+            return "その他"
+        }
+    }
 
-            Log.i(TAG, "とりあえずジオフェンスのイベントが走った" + triggeringGeofences.toString())
-        } else {
-            // Log the error
-            Log.e(TAG, "geofence error")
+    private fun sendNotification(context: Context?, message: String) {
+        // 通知の発行
+        if(context != null){
+            val geoNotification = GeoNotification()
+            geoNotification.showNotification(context,message)
         }
     }
 }

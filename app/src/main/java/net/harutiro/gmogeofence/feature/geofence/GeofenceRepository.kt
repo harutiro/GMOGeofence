@@ -45,9 +45,13 @@ class GeofenceRepository(_activity: Context) {
             // ジオフェンスの有効期限を設定　今回は無期限
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
 
+            // 入室してから60秒間滞在したらアラートを発生させる
+            // この期間中に退出したら、アラートは発生しない。
+            .setLoiteringDelay(60000)
+
             // 対象となる遷移タイプを設定します。 アラートはこれらに対してのみ生成されます
-            // このサンプルでは、入口と出口の遷移を追跡します。
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+            // このサンプルでは、入口と出口と滞在の遷移を追跡します。
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT or Geofence.GEOFENCE_TRANSITION_DWELL)
 
             // ジオフェンスのベストエフォート通知応答性を設定します。 このサンプルでは、ジオフェンスに入るとすぐにアラートが生成されます。
             // 。応答性の値を大きく設定すると (たとえば 5 分)、電力を大幅に節約できます。
@@ -68,12 +72,14 @@ class GeofenceRepository(_activity: Context) {
             //DWELL が　一番電池持ちの観点でよき　100m にするともっと電池持ちがいい
             //Geofence.GEOFENCE_TRANSITION_DWELLジオフェンスが追加されたとき、およびデバイスがしばらくの間すでにそのジオフェンス内にある場合に、ジオフェンス サービスが通知をトリガーする必要があることを示すフラグ。
             //Geofence.GEOFENCE_TRANSITION_EXITジオフェンスが追加された時点で、デバイスがすでにそのジオフェンスの外にある場合に、ジオフェンス サービスが通知をトリガーする必要があることを示すフラグ。
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
 
             // ジオフェンスのリストを追加します。
             addGeofences(geofenceList)
         }.build()
     }
+
+
 
     fun addGeoFences() {
         if (ActivityCompat.checkSelfPermission(
