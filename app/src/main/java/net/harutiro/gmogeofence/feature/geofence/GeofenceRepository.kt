@@ -80,14 +80,10 @@ class GeofenceRepository(_activity: Context) {
         ) {
             geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
                 addOnSuccessListener {
-                    // Geofences added
-                    // ...
-                    Log.d(TAG, "addGeofences: Success")
+                    Log.d(TAG, "addGeoFences: Success")
                 }
                 addOnFailureListener {
-                    // Failed to add geofences
-                    // ...
-                    Log.e(TAG, "addGeofences: Failure")
+                    Log.e(TAG, "addGeoFences: Failure")
                     Log.e(TAG, it.toString())
                 }
             }
@@ -98,14 +94,12 @@ class GeofenceRepository(_activity: Context) {
     fun stopGeoFence() {
         geofencingClient.removeGeofences(geofencePendingIntent).run {
             addOnSuccessListener {
-                // Geofences removed
-                // ...
-                Log.d(TAG, "stopGeofece: Success")
+                // GeoFences removed
+                Log.d(TAG, "stopGeoFences: Success")
             }
             addOnFailureListener {
-                // Failed to remove geofences
-                // ...
-                Log.e(TAG, "stopGeofece: Failure")
+                // Failed to remove GeoFences
+                Log.e(TAG, "stopGeoFences: Failure")
             }
         }
     }
