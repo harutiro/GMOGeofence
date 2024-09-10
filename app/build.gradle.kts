@@ -66,4 +66,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // GeoFence
+    implementation(libs.play.services.location)
+
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Map
+    implementation(libs.osmdroid.android)
 }
