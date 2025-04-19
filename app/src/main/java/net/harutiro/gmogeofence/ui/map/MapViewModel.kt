@@ -42,7 +42,7 @@ class MainViewModel(_app: Application): AndroidViewModel(_app) {
             value = latlng.value
         )
 
-        val radius = 300f
+        val radius = 500f
 
         geofenceRepository.createGeofence(entry,radius)
 

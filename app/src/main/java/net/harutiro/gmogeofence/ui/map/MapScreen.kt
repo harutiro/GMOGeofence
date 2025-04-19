@@ -17,7 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,11 +34,19 @@ import net.harutiro.gmogeofence.feature.map.MapSetupController
 import net.harutiro.gmogeofence.feature.map.MapTapController
 import net.harutiro.gmogeofence.feature.notification.GeoNotification
 import net.harutiro.gmogeofence.ui.map.component.MapView
+import net.harutiro.gmogeofence.utils.EnergyCallback
+import net.harutiro.gmogeofence.utils.EnergyChecker
+import net.harutiro.gmogeofence.utils.OtherFileStorage
 
 @Composable
 fun MapScreen(mainViewModel:MainViewModel = viewModel()){
     val context = LocalContext.current
     val activity: Activity = LocalContext.current as Activity
+
+    var energyValue by remember { mutableLongStateOf(0L) }
+
+    // csvファイル書き込み
+    var otherFileStorage: OtherFileStorage? = null
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
@@ -67,7 +77,7 @@ fun MapScreen(mainViewModel:MainViewModel = viewModel()){
                     horizontal = 16.dp,
                     vertical = 16.dp
                 )//右下に配置
-                .align(Alignment.CenterEnd),
+                .align(Alignment.TopCenter),
 
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -83,7 +93,7 @@ fun MapScreen(mainViewModel:MainViewModel = viewModel()){
                     }
                 }
             }){
-                Text("通知発行のパ＝ミッション許可をもらう")
+                Text("通知パーミッション許可")
             }
             Button(
                 onClick = {
@@ -100,6 +110,37 @@ fun MapScreen(mainViewModel:MainViewModel = viewModel()){
             ) {
                 Text("止める")
             }
+
+
+            Button(
+                onClick = {
+                    otherFileStorage = OtherFileStorage(context)
+                    val energyChecker = EnergyChecker(context)
+                    // エネルギーチェックを開始
+                    energyChecker.start(object : EnergyCallback {
+                        override fun onEnergyChecked(energy: Long) {
+                            // ここでエネルギー値を処理する
+                            energyValue = energy
+                            otherFileStorage?.doLog(energy.toString())
+                        }
+                    })
+                }
+            ) {
+                Text(text = "電量を確認する")
+            }
+
+            Button(
+                onClick = {
+                    otherFileStorage = null
+                    val energyChecker = EnergyChecker(context)
+                    // エネルギーチェックを停止
+                    energyChecker.stop()
+                }
+            ) {
+                Text(text = "電量チェックを止める")
+            }
+
+            Text(text = "電量: $energyValue μAh")
         }
 
     }
